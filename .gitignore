@@ -1,0 +1,5 @@
+.idea
+venv
+env
+mcis.iml
+data.db
