@@ -1,9 +1,10 @@
-
 from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
 from resources.user import User, UserRegister, UserLogin
+from resources.add_child import AddChild
+from resources.search_child import SearchChild
 
 import os
 
@@ -60,6 +61,8 @@ def fresh_token_loader_callback():
 api.add_resource(User, "/api/v1/user/<int:user_id>")
 api.add_resource(UserRegister, "/api/v1/register")
 api.add_resource(UserLogin, "/api/v1/login")
+api.add_resource(AddChild, "/api/v1/addchild")
+api.add_resource(SearchChild, "/api/v1/searchchild")
 
 if __name__ == '__main__':
     from database.db import db

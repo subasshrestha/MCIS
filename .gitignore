@@ -3,3 +3,11 @@ venv
 env
 mcis.iml
 data.db
+model.h5
+data.csv
+svm_model.sav
+train
+images
+temp_images
+croped_images
+temp_croped_images
