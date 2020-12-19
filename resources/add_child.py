@@ -94,7 +94,7 @@ class AddChild(Resource):
         #     print(e)
 
         # section for saving child info into database
-        child = ChildModel(data['name'], saved_path)
+        child = ChildModel(data['name'], img_name)
         child.save_to_db()
 
         print("cropping face...")
