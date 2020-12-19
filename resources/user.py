@@ -73,8 +73,19 @@ class UserRegister(Resource):
                        "message": "Sorry, fullname, email, and password are required.",
                         "data":data
                    }, 400
-
-        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",data['password']):
+        if data['email'] == '':
+            return {
+                "message": 'Sorry, email is required'
+            },400
+        if data['password'] == '':
+            return {
+                       "message": 'Sorry, password is required'
+                   },400
+        if data['fullname'] == '':
+            return {
+                       "message": 'Sorry, name is required'
+                   },400
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$",data['password']):
             return {
                        "message": "Password must be 8 character or longer with uppercase,lowercase,numbers and special symbols"
                    }, 400
@@ -92,9 +103,15 @@ class UserRegister(Resource):
 
         user = UserModel(data["email"], hashlib.sha256(data["password"].encode("utf-8")).hexdigest(),fullname=data['fullname'])
         user.save_to_db()
+        access_token = create_access_token(identity=user.id, fresh=True)  # Puts User ID as Identity in JWT
+        refresh_token = create_refresh_token(identity=user.id)  # Puts User ID as Identity in JWT
+
         return {
-            "message": "User {} created!".format(data["email"])
-        }
+                   "access_token": access_token,
+                   "refresh_token": refresh_token,
+                    "email": user.email,
+                    "fullname": user.full_name
+               }, 200
 
 
 class UserLogin(Resource):
@@ -109,7 +126,9 @@ class UserLogin(Resource):
 
             return {
                        "access_token": access_token,
-                       "refresh_token": refresh_token
+                       "refresh_token": refresh_token,
+                        "email": user.email,
+                        "fullname": user.full_name
                    }, 200
 
         return {

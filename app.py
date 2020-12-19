@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
 from resources.user import User, UserRegister, UserLogin
-from resources.add_child import AddChild
+from resources.add_child import AddChild,ListChild
 from resources.search_child import SearchChild
 
 import os
@@ -62,6 +62,7 @@ api.add_resource(User, "/api/v1/user/<int:user_id>")
 api.add_resource(UserRegister, "/api/v1/register")
 api.add_resource(UserLogin, "/api/v1/login")
 api.add_resource(AddChild, "/api/v1/addchild")
+api.add_resource(ListChild, "/api/v1/child")
 api.add_resource(SearchChild, "/api/v1/searchchild")
 
 if __name__ == '__main__':
@@ -72,6 +73,13 @@ if __name__ == '__main__':
     @app.before_first_request
     def create_tables():
         db.create_all()
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+        return response
 
 
     app.run(port=5000, debug=True)

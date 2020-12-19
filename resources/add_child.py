@@ -1,6 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask import request
 import os, requests
+import base64
 from keras.models import load_model
 from utilities.crop_face import crop_face
 from utilities.preprocess_image import preprocess_image
@@ -20,7 +21,13 @@ _child_parser.add_argument(
     "name",
     type=str,
     required=True,
-    help="This field cannot be blank"
+    help="This field cannot be blank",
+)
+_child_parser.add_argument(
+    "image",
+    type=str,
+    required=True,
+    help="This field cannot be blank",
 )
 
 
@@ -53,20 +60,39 @@ def create_new_folder(local_dir):
         os.makedirs(newpath)
     return newpath
 
+class ListChild(Resource):
+    @staticmethod
+    def get():
+        children = ChildModel.find_all()
+        return children,200
 
 class AddChild(Resource):
     @staticmethod
     def post():
         print("saving image...")
+        print('')
         data = _child_parser.parse_args()
-        if request.files['image']:
-            img = request.files['image']
-            img_name = str(uuid.uuid4()) + '.jpg'
-            create_new_folder(os.path.join(real_path, 'images'))
-            saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
-            img.save(saved_path)
-        else:
-            return {"msg": "Missing image file"}, 400
+        img_name = str(uuid.uuid4()) + '.jpg'
+        create_new_folder(os.path.join(real_path, 'images'))
+        saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
+        with open(saved_path, "wb") as fh:
+            fh.write(base64.decodebytes(data['image'].encode()))
+
+
+
+        # try:
+        #     print(data['image'])
+        #     if request.files['image']:
+        #         img = request.files['image']
+        #         img_name = str(uuid.uuid4()) + '.jpg'
+        #         create_new_folder(os.path.join(real_path, 'images'))
+        #         saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
+        #         img.save(saved_path)
+        #     else:
+        #         return {"msg": "Missing image file"}, 400
+        # except Exception as e:
+        #     print(e)
+
         # section for saving child info into database
         child = ChildModel(data['name'], saved_path)
         child.save_to_db()
@@ -74,7 +100,7 @@ class AddChild(Resource):
         print("cropping face...")
         id = child.id  # get this value from database(child record id)
         if not crop_face(saved_path, os.path.join(os.getcwd(), 'croped_images/' + str(id))):
-            return {"msg": "face not found in image"}, 404
+            return {"message": "face not found in image"}, 404
 
         print("generating multiple images...")
         # generating multiple image from uploaded image
@@ -104,4 +130,4 @@ class AddChild(Resource):
         # training
         print("trainning...")
         train(id)
-        return {"msg": "success"}
+        return {"message": "success"}
