@@ -135,6 +135,18 @@ class UserLogin(Resource):
                    "message": "Invalid credentials!"
                }, 401
 
+class CurrentUser(Resource):
+    @jwt_refresh_token_required
+    def post(self):
+        current_user_id = get_jwt_identity()  # Gets Identity from JWT
+        new_token = create_access_token(identity=current_user_id, fresh=False)
+        user = UserModel.find_user_by_id(current_user_id)
+        return {
+                   "access_token": new_token,
+                   "email": user.email,
+                   "fullname": user.full_name
+               }, 200
+
 
 class TokenRefresh(Resource):
     @jwt_refresh_token_required
@@ -142,5 +154,5 @@ class TokenRefresh(Resource):
         current_user_id = get_jwt_identity()  # Gets Identity from JWT
         new_token = create_access_token(identity=current_user_id, fresh=False)
         return {
-                   "access_token": new_token
+                   "access_token": new_token,
                }, 200
