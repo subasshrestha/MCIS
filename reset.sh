@@ -1,8 +1,8 @@
-sudo rm -rf croped_images
-sudo rm -rf images
-sudo rm -rf temp_croped_images
-sudo rm -rf temp_images
-sudo rm -rf data.csv
-sudo rm -rf data.db
-sudo rm -rf svm_model.sav
-sudo rm -rf train
+rm -rf croped_images
+rm -rf images
+rm -rf temp_croped_images
+rm -rf temp_images
+rm -rf data.csv
+rm -rf data.db
+rm -rf svm_model.sav
+rm -rf train
