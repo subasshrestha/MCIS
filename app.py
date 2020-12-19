@@ -5,7 +5,8 @@ from flask_jwt_extended import JWTManager
 from resources.user import User, UserRegister, UserLogin,TokenRefresh
 from resources.add_child import AddChild,ListChild
 from resources.search_child import SearchChild
-
+from resources.reset import Reset
+from resources.image import Image
 import os
 
 app = Flask(__name__)
@@ -65,6 +66,9 @@ api.add_resource(TokenRefresh, "/api/v1/refresh")
 api.add_resource(AddChild, "/api/v1/addchild")
 api.add_resource(ListChild, "/api/v1/child")
 api.add_resource(SearchChild, "/api/v1/searchchild")
+api.add_resource(Reset, "/api/v1/reset")
+api.add_resource(Image, "/api/v1/image/<name>")
+
 
 if __name__ == '__main__':
     from database.db import db
