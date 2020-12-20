@@ -1,7 +1,7 @@
 import os
 from flask_restful import Resource
 import shutil
-
+from database.db import db
 
 def remove_file(path):
     try:
@@ -27,4 +27,5 @@ class Reset(Resource):
         remove_directory('images')
         remove_directory('temp_croped_images')
         remove_directory('temp_images')
+        db.create_all()
         return {"msg": "success"}, 200
