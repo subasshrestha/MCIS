@@ -2,8 +2,8 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
-from resources.user import User, UserRegister, UserLogin,TokenRefresh
-from resources.add_child import AddChild,ListChild
+from resources.user import User, UserRegister, UserLogin, TokenRefresh
+from resources.add_child import AddChild, ListChild
 from resources.search_child import SearchChild
 from resources.reset import Reset
 from resources.image import Image
@@ -69,16 +69,17 @@ api.add_resource(SearchChild, "/api/v1/searchchild")
 api.add_resource(Reset, "/api/v1/reset")
 api.add_resource(Image, "/api/v1/image/<name>")
 
+from database.db import db
+
+db.init_app(app)
+
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
 
 if __name__ == '__main__':
-    from database.db import db
-    db.init_app(app)
-
-
-    @app.before_first_request
-    def create_tables():
-        db.create_all()
-
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -87,4 +88,4 @@ if __name__ == '__main__':
         return response
 
 
-    app.run(port=5000, debug=True)
+    app.run()
