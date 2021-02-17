@@ -60,38 +60,36 @@ def create_new_folder(local_dir):
         os.makedirs(newpath)
     return newpath
 
+
 class ListChild(Resource):
     @staticmethod
     def get():
         children = ChildModel.find_all()
-        return children,200
+        return children, 200
+
 
 class AddChild(Resource):
     @staticmethod
     def post():
         print("saving image...")
-        print('')
-        data = _child_parser.parse_args()
-        img_name = str(uuid.uuid4()) + '.jpg'
-        create_new_folder(os.path.join(real_path, 'images'))
-        saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
-        with open(saved_path, "wb") as fh:
-            fh.write(base64.decodebytes(data['image'].encode()))
-
-
-
-        # try:
-        #     print(data['image'])
-        #     if request.files['image']:
-        #         img = request.files['image']
-        #         img_name = str(uuid.uuid4()) + '.jpg'
-        #         create_new_folder(os.path.join(real_path, 'images'))
-        #         saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
-        #         img.save(saved_path)
-        #     else:
-        #         return {"msg": "Missing image file"}, 400
-        # except Exception as e:
-        #     print(e)
+        if request.files.get("image"):
+            print("image file..")
+            if not request.form.get("name"):
+                return {"message":"Name field cant be empty."}
+            data = {"name": request.form.get("name")}
+            img = request.files['image']
+            img_name = str(uuid.uuid4()) + '.jpg'
+            create_new_folder(os.path.join(real_path, 'images'))
+            saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
+            img.save(saved_path)
+        else:
+            print("base64 image")
+            data = _child_parser.parse_args()
+            img_name = str(uuid.uuid4()) + '.jpg'
+            create_new_folder(os.path.join(real_path, 'images'))
+            saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
+            with open(saved_path, "wb") as fh:
+                fh.write(base64.decodebytes(data['image'].encode()))
 
         # section for saving child info into database
         child = ChildModel(data['name'], img_name)

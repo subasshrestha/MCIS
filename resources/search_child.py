@@ -27,12 +27,21 @@ def create_new_folder(local_dir):
 class SearchChild(Resource):
     def post(self):
         print("getting image...")
-        data = _child_search_parser.parse_args()
-        img_name = str(uuid.uuid4()) + '.jpg'
-        create_new_folder(os.path.join(real_path, 'temp_images'))
-        saved_path = os.path.join(os.path.join(real_path, 'temp_images'), img_name)
-        with open(saved_path, "wb") as fh:
-            fh.write(base64.decodebytes(data['image'].encode()))
+        if request.files.get("image"):
+            print("image file..")
+            img = request.files['image']
+            img_name = str(uuid.uuid4()) + '.jpg'
+            create_new_folder(os.path.join(real_path, 'temp_images'))
+            saved_path = os.path.join(os.path.join(real_path, 'temp_images'), img_name)
+            img.save(saved_path)
+        else:
+            print("base64 image..")
+            data = _child_search_parser.parse_args()
+            img_name = str(uuid.uuid4()) + '.jpg'
+            create_new_folder(os.path.join(real_path, 'temp_images'))
+            saved_path = os.path.join(os.path.join(real_path, 'temp_images'), img_name)
+            with open(saved_path, "wb") as fh:
+                fh.write(base64.decodebytes(data['image'].encode()))
         print("cropping face...")
         if not crop_face(saved_path, os.path.join(os.getcwd(), 'temp_croped_images')):
             return {"message": "face not found in image"}, 404
@@ -46,6 +55,7 @@ class SearchChild(Resource):
                 return {"message": "Child not found"}, 404
             res = svm_model.predict(x)
             child = ChildModel.find_user_by_id(res[0])
+            print(child)
             if child:
                 return {"message": "success", "data": child.json()}, 200
             else:
