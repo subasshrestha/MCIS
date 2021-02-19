@@ -5,12 +5,18 @@ class ChildModel(db.Model):
     __tablename__ = "childs"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
+    address = db.Column(db.String(80))
+    parent_name = db.Column(db.String(80))
+    phone = db.Column(db.String(10))
     image = db.Column(db.String(200))
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), server_default=db.func.now(), server_onupdate=db.func.now())
 
-    def __init__(self, name,image):
+    def __init__(self, name, address, parent_name, phone, image):
         self.name = name
+        self.address = address
+        self.parent_name = parent_name
+        self.phone = phone
         self.image = image
 
     def json(self):

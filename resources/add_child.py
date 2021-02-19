@@ -1,18 +1,19 @@
-from flask_restful import Resource, reqparse
-from flask import request
-import os, requests
 import base64
+import glob
+import os
+import pickle
+import uuid
+
+import pandas as pd
+from flask import request
+from flask_restful import Resource, reqparse
 from keras.models import load_model
+from keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from sklearn import svm
+
+from models.child import ChildModel
 from utilities.crop_face import crop_face
 from utilities.preprocess_image import preprocess_image
-import glob
-import pandas as pd
-from sklearn import svm
-import pickle
-from werkzeug.utils import secure_filename
-import uuid
-from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-from models.child import ChildModel
 
 real_path = os.getcwd()
 
@@ -24,7 +25,19 @@ _child_parser.add_argument(
     help="This field cannot be blank",
 )
 _child_parser.add_argument(
-    "image",
+    "address",
+    type=str,
+    required=True,
+    help="This field cannot be blank",
+)
+_child_parser.add_argument(
+    "parent_name",
+    type=str,
+    required=True,
+    help="This field cannot be blank",
+)
+_child_parser.add_argument(
+    "phone",
     type=str,
     required=True,
     help="This field cannot be blank",
@@ -74,9 +87,7 @@ class AddChild(Resource):
         print("saving image...")
         if request.files.get("image"):
             print("image file..")
-            if not request.form.get("name"):
-                return {"message":"Name field cant be empty."}
-            data = {"name": request.form.get("name")}
+            data = _child_parser.parse_args()
             img = request.files['image']
             img_name = str(uuid.uuid4()) + '.jpg'
             create_new_folder(os.path.join(real_path, 'images'))
@@ -85,14 +96,18 @@ class AddChild(Resource):
         else:
             print("base64 image")
             data = _child_parser.parse_args()
+            if request.form.get("image"):
+                image = request.form.get("image")
+            else:
+                return {"message": {"image": "This field can not be empty."}}
             img_name = str(uuid.uuid4()) + '.jpg'
             create_new_folder(os.path.join(real_path, 'images'))
             saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
             with open(saved_path, "wb") as fh:
-                fh.write(base64.decodebytes(data['image'].encode()))
+                fh.write(base64.decodebytes(image.encode()))
 
         # section for saving child info into database
-        child = ChildModel(data['name'], img_name)
+        child = ChildModel(data['name'], data['address'], data['parent_name'], data['phone'], img_name)
         child.save_to_db()
 
         print("cropping face...")
@@ -126,6 +141,6 @@ class AddChild(Resource):
                 break
 
         # training
-        print("trainning...")
+        print("training...")
         train(id)
         return {"message": "success"}
