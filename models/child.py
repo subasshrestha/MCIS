@@ -34,3 +34,12 @@ class ChildModel(db.Model):
     @classmethod
     def find_user_by_id(cls, _id):
         return cls.query.filter_by(id=int(_id)).first()
+
+    @classmethod
+    def find_all(cls):
+        children = cls.query.all()
+        return [{
+            "id": child.id,
+            "name": child.name,
+            "image": child.image
+        } for child in children]

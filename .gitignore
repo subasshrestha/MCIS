@@ -11,3 +11,4 @@ images
 temp_images
 croped_images
 temp_croped_images
+**/__pycache__/

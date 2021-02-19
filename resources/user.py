@@ -73,8 +73,19 @@ class UserRegister(Resource):
                        "message": "Sorry, fullname, email, and password are required.",
                         "data":data
                    }, 400
-
-        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",data['password']):
+        if data['email'] == '':
+            return {
+                "message": 'Sorry, email is required'
+            },400
+        if data['password'] == '':
+            return {
+                       "message": 'Sorry, password is required'
+                   },400
+        if data['fullname'] == '':
+            return {
+                       "message": 'Sorry, name is required'
+                   },400
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$",data['password']):
             return {
                        "message": "Password must be 8 character or longer with uppercase,lowercase,numbers and special symbols"
                    }, 400
@@ -92,9 +103,15 @@ class UserRegister(Resource):
 
         user = UserModel(data["email"], hashlib.sha256(data["password"].encode("utf-8")).hexdigest(),fullname=data['fullname'])
         user.save_to_db()
+        access_token = create_access_token(identity=user.id, fresh=True)  # Puts User ID as Identity in JWT
+        refresh_token = create_refresh_token(identity=user.id)  # Puts User ID as Identity in JWT
+
         return {
-            "message": "User {} created!".format(data["email"])
-        }
+                   "access_token": access_token,
+                   "refresh_token": refresh_token,
+                    "email": user.email,
+                    "fullname": user.full_name
+               }, 200
 
 
 class UserLogin(Resource):
@@ -109,12 +126,26 @@ class UserLogin(Resource):
 
             return {
                        "access_token": access_token,
-                       "refresh_token": refresh_token
+                       "refresh_token": refresh_token,
+                        "email": user.email,
+                        "fullname": user.full_name
                    }, 200
 
         return {
                    "message": "Invalid credentials!"
                }, 401
+
+class CurrentUser(Resource):
+    @jwt_refresh_token_required
+    def post(self):
+        current_user_id = get_jwt_identity()  # Gets Identity from JWT
+        new_token = create_access_token(identity=current_user_id, fresh=False)
+        user = UserModel.find_user_by_id(current_user_id)
+        return {
+                   "access_token": new_token,
+                   "email": user.email,
+                   "fullname": user.full_name
+               }, 200
 
 
 class TokenRefresh(Resource):
@@ -123,5 +154,5 @@ class TokenRefresh(Resource):
         current_user_id = get_jwt_identity()  # Gets Identity from JWT
         new_token = create_access_token(identity=current_user_id, fresh=False)
         return {
-                   "access_token": new_token
+                   "access_token": new_token,
                }, 200

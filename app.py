@@ -2,10 +2,11 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
-from resources.user import User, UserRegister, UserLogin
-from resources.add_child import AddChild
+from resources.user import User, UserRegister, UserLogin, TokenRefresh
+from resources.add_child import AddChild, ListChild
 from resources.search_child import SearchChild
-
+from resources.reset import Reset
+from resources.image import Image
 import os
 
 app = Flask(__name__)
@@ -61,17 +62,30 @@ def fresh_token_loader_callback():
 api.add_resource(User, "/api/v1/user/<int:user_id>")
 api.add_resource(UserRegister, "/api/v1/register")
 api.add_resource(UserLogin, "/api/v1/login")
+api.add_resource(TokenRefresh, "/api/v1/refresh")
 api.add_resource(AddChild, "/api/v1/addchild")
+api.add_resource(ListChild, "/api/v1/child")
 api.add_resource(SearchChild, "/api/v1/searchchild")
+api.add_resource(Reset, "/api/v1/reset")
+api.add_resource(Image, "/api/v1/image/<name>")
+
+from database.db import db
+
+db.init_app(app)
+
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
 
 if __name__ == '__main__':
-    from database.db import db
-    db.init_app(app)
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+        return response
 
 
-    @app.before_first_request
-    def create_tables():
-        db.create_all()
-
-
-    app.run(port=5000, debug=True)
+    app.run()
