@@ -17,6 +17,12 @@ class DeleteChild(Resource):
         child = ChildModel.find_user_by_id(child_id)
         if child:
             try:
+                print("removing from db...")
+                child.remove_from_db()
+            except:
+                print("error occured")
+
+            try:
                 print("deleting from csv...")
                 df = pd.read_csv("data.csv", header=None)
                 df = df.set_index(0)
@@ -24,7 +30,7 @@ class DeleteChild(Resource):
                 df.to_csv("data.csv", header=None)
             except:
                 print("error occurred")
-                pass
+
             try:
                 print("deleting from images folder")
                 child_image_name = child.image
@@ -32,20 +38,20 @@ class DeleteChild(Resource):
                 os.remove(path)
             except:
                 print("error occurred")
-                pass
+
             try:
                 print("deleting from train folder")
                 path = os.path.join(os.getcwd(), 'train', str(child_id))
                 shutil.rmtree(path)
             except:
                 print("error occurred")
-                pass
+
             try:
                 print("deleting from croped_images folder")
                 path = os.path.join(os.getcwd(), 'croped_images', str(child_id))
                 shutil.rmtree(path)
             except:
-                pass
+                print("error occurred")
 
             try:
                 print("Training Model...")
@@ -57,7 +63,7 @@ class DeleteChild(Resource):
                 pickle.dump(clf, open("svm_model.sav", 'wb'))
             except:
                 print("error occured")
-                pass
+
             return {"message": "success"}
         else:
             print("child not found")
