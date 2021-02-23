@@ -51,6 +51,7 @@ class SearchChild(Resource):
             vgg_face_descriptor = load_model(model_path)
             svm_model = pickle.load(open(os.path.join(real_path, "svm_model.sav"), 'rb'))
             x = vgg_face_descriptor.predict(preprocess_image(os.path.join(real_path, 'temp_croped_images/1.jpg')))
+            print("Probability: "+str(np.max(svm_model.predict_proba(x))))
             if np.max(svm_model.predict_proba(x)) < 0.6:
                 return {"message": "Child not found"}, 404
             res = svm_model.predict(x)

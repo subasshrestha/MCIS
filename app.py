@@ -5,6 +5,7 @@ from flask_jwt_extended import JWTManager
 from resources.user import User, UserRegister, UserLogin, TokenRefresh
 from resources.add_child import AddChild, ListChild
 from resources.search_child import SearchChild
+from resources.delete_child import DeleteChild
 from resources.reset import Reset
 from resources.image import Image
 import os
@@ -68,6 +69,7 @@ api.add_resource(ListChild, "/api/v1/child")
 api.add_resource(SearchChild, "/api/v1/searchchild")
 api.add_resource(Reset, "/api/v1/reset")
 api.add_resource(Image, "/api/v1/image/<name>")
+api.add_resource(DeleteChild, "/api/v1/delete/<child_id>")
 
 from database.db import db
 
