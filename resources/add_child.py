@@ -42,6 +42,12 @@ _child_parser.add_argument(
     required=True,
     help="This field cannot be blank",
 )
+_child_parser.add_argument(
+    "photo",
+    type=str,
+    required=True,
+    help="This field cannot be blank",
+)
 
 
 def save_to_csv(data, key):
@@ -85,27 +91,15 @@ class AddChild(Resource):
     @staticmethod
     def post():
         print("saving image...")
-        if request.files.get("image"):
-            print("image file..")
-            data = _child_parser.parse_args()
-            img = request.files['image']
-            img_name = str(uuid.uuid4()) + '.jpg'
-            create_new_folder(os.path.join(real_path, 'images'))
-            saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
-            img.save(saved_path)
-        else:
-            print("base64 image")
-            data = _child_parser.parse_args()
-            if 'photo' in data and data['photo']:
-                print("gotchimage")
-                image = data['photo']
-            else:
-                return {"message": {"image": "This field can not be empty."}}, 404
-            img_name = str(uuid.uuid4()) + '.jpg'
-            create_new_folder(os.path.join(real_path, 'images'))
-            saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
-            with open(saved_path, "wb") as fh:
-                fh.write(base64.decodebytes(image.encode()))
+
+        print("base64 image")
+        data = _child_parser.parse_args()
+        image = data['photo']
+        img_name = str(uuid.uuid4()) + '.jpg'
+        create_new_folder(os.path.join(real_path, 'images'))
+        saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)
+        with open(saved_path, "wb") as fh:
+            fh.write(base64.decodebytes(image.encode()))
 
         # section for saving child info into database
         child = ChildModel(data['name'], data['address'], data['parent_name'], data['phone'], img_name)
