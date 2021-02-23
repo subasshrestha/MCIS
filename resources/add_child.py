@@ -96,10 +96,11 @@ class AddChild(Resource):
         else:
             print("base64 image")
             data = _child_parser.parse_args()
-            if request.form.get("image"):
-                image = request.form.get("image")
+            if 'photo' in data and data['photo']:
+                print("gotchimage")
+                image = data['photo']
             else:
-                return {"message": {"image": "This field can not be empty."}}
+                return {"message": {"image": "This field can not be empty."}}, 404
             img_name = str(uuid.uuid4()) + '.jpg'
             create_new_folder(os.path.join(real_path, 'images'))
             saved_path = os.path.join(os.path.join(real_path, 'images'), img_name)

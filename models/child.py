@@ -23,7 +23,10 @@ class ChildModel(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "image": self.image
+            "image": self.image,
+            "parent_name": self.parent_name,
+            "phone": self.phone,
+            "address": self.address
         }
 
     # Method to save user to DB
@@ -47,5 +50,8 @@ class ChildModel(db.Model):
         return [{
             "id": child.id,
             "name": child.name,
-            "image": child.image
+            "image": child.image,
+            "parent_name": child.parent_name,
+            "phone": child.phone,
+            "address": child.address
         } for child in children]
